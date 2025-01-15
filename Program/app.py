@@ -19,7 +19,6 @@ from kivy.clock import Clock
 
 from kivy.config import Config
 
-# Backend Imports:
 from backend import index_pdf
 
 Config.set('graphics', 'width', '360')
