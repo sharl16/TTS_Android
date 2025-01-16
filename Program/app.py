@@ -7,19 +7,27 @@ kivy.require('2.3.0')
 
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.image import Image
 
 from kivy.core.window import Window
 from kivy.clock import Clock
+from kivy.animation import Animation
 
 from kivy.config import Config
 
 from backend import index_pdf
+
+from animations import animate_spinner
+
+from dependencies import download_dependancies
+from dependencies import update_dependancies
 
 Config.set('graphics', 'width', '360')
 Config.set('graphics', 'height', '640')
@@ -133,13 +141,60 @@ def create_tab(self, subject):
     tab.add_widget(tab_content)
     return tab
 
+def create_update_ui(self):
+    updateImage = Image(
+        source= r'Program\resources\loadingCircle.png',
+        color=(81/255, 141/255, 208/255, 0), #change alpha to 1
+        size_hint=(None, None),
+        size = (57, 57),
+        pos=(151, 330)
+    )
+    updateText = Label(
+        text='Unknown fault',
+        color=(0,0,0,1),
+        halign='center',
+        valign='center',
+        font_size='20sp',
+        size_hint=(None, None),
+        size = (265, 20),
+        pos = (55, 300)
+    )
+    updateUI = FloatLayout()
+    updateUI.add_widget(updateImage)
+    updateUI.add_widget(updateText)
+    updateUI.updateText = updateText
+    updateUI.updateImage = updateImage
+    return updateUI
+
+def switch_widgets(self, scroll_view, update_ui):
+    self.add_widget(scroll_view)
+    self.remove_widget(update_ui)
+
+def check_for_updates(ui, self, next_ui):
+    update_event = threading.Event()
+
+    def thread_upd_dependancies():
+        update_dependancies(ui)
+        update_event.set()
+
+    threading.Thread(target=thread_upd_dependancies).start()
+    
+    def wait_for_update(dt):
+        if update_event.is_set():
+            switch_widgets(self, next_ui, ui)
+            Clock.unschedule(wait_for_update)
+            return False
+        return True
+    
+    Clock.schedule_interval(wait_for_update, 0)  
+
 class MainApp(FloatLayout):
     def __init__(self, **kwargs):
         super(MainApp, self).__init__(**kwargs)
         
         Window.clearcolor = (1, 1, 1, 1)  
         self.tabbed_panel = TabbedPanel(do_default_tab=False)
-        subjects = ["ΑΛΓΕΒΡΑ", "ΑΡΧΑΙΑ", "ΒΙΟΛΟΓΙΑ", "ΓΕΩΜΕΤΡΙΑ", "ΓΛΩΣΣΑ", "ΙΣΤΟΡΙΑ", "ΜΑΘ_ΘΕΤ", "ΦΥΣΙΚΗ"]
+        subjects = ["ΑΛΓΕΒΡΑ", "ΑΡΧΑΙΑ", "ΒΙΟΛΟΓΙΑ", "ΓΕΩΜΕΤΡΙΑ", "ΓΛΩΣΣΑ", "ΙΣΤΟΡΙΑ", "ΜΑΘ_ΘΕΤ", "ΦΥΣ_ΘΕΤ"]
 
         for subject in subjects:
             tab = create_tab(self, subject)
@@ -148,7 +203,12 @@ class MainApp(FloatLayout):
         scroll_view = ScrollView(do_scroll_x=True, size_hint=(None, None), size=(360, 580), pos=(0, 0))
         scroll_view.add_widget(self.tabbed_panel)
 
-        self.add_widget(scroll_view)
+        updateUi = create_update_ui(self) 
+        self.add_widget(updateUi)
+
+        check_for_updates(updateUi, self, scroll_view)
+        #animate_spinner(updateUi.updateImage)
+
 
 
 class TTS_Android(App):
