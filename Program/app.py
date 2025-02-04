@@ -32,7 +32,6 @@ from dependencies import update_dependancies
 Config.set('graphics', 'width', '360')
 Config.set('graphics', 'height', '640')
 Config.set('graphics', 'resizable', 0)
-Window.size = (360, 640) 
 
 def toggle_widget_visibility(widget, state):
     rgb_values = widget.color[:3]
@@ -144,7 +143,7 @@ def create_tab(self, subject):
 def create_update_ui(self):
     updateImage = Image(
         source= r'Program\resources\loadingCircle.png',
-        color=(81/255, 141/255, 208/255, 0), #change alpha to 1
+        color=(81/255, 141/255, 208/255, 1), #change alpha to 1
         size_hint=(None, None),
         size = (57, 57),
         pos=(151, 330)
@@ -157,13 +156,24 @@ def create_update_ui(self):
         font_size='20sp',
         size_hint=(None, None),
         size = (265, 20),
-        pos = (55, 300)
+        pos = (55, 320)
+    )
+    progressText = Label(
+        text='',
+        color=(0,0,0,1),
+        halign='center',
+        valign='center',
+        font_size='20sp',
+        size_hint=(None, None),
+        size = (265, 20),
+        pos = (55, 295)
     )
     updateUI = FloatLayout()
-    updateUI.add_widget(updateImage)
+    #updateUI.add_widget(updateImage)
     updateUI.add_widget(updateText)
+    updateUI.add_widget(progressText)
     updateUI.updateText = updateText
-    updateUI.updateImage = updateImage
+    updateUI.progressText = progressText
     return updateUI
 
 def switch_widgets(self, scroll_view, update_ui):
@@ -213,6 +223,8 @@ class MainApp(FloatLayout):
 
 class TTS_Android(App):
     def build(self):
+        Window.size = (360, 640) 
+        Window.set_title('Αναζήτηση ΤΘ')
         return MainApp()
 
 
