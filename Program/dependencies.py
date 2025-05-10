@@ -13,7 +13,7 @@ def update_dependancies(ui):
         ui.updateText.text = "Προετοιμασία για πρώτη χρήση.."
         time.sleep(0.5)
         download_dependancies(ui)
-    git_config_file = "https://raw.githubusercontent.com/sharl16/Trapeza_Thematwn_Searcher/main/PDFs/B/version.json"
+    git_config_file = "https://raw.githubusercontent.com/sharl16/TTS_Android/refs/heads/main/PDFs/version.json"
     ui.updateText.text = "Έλεγχος για ενημερώσεις.."
     try:
         session = requests.session()
